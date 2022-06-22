@@ -195,6 +195,8 @@ class MockVM {
         case koinos.chain.system_call_id.put_object: {
           const { space, key, obj } = koinos.chain.put_object_arguments.decode(argsBuf)
 
+          console.log(`put object: ${space}, ${key}, ${obj}`)
+
           if (space.system === METADATA_SPACE.system &&
             ( space.id === METADATA_SPACE.id || space.id === null ) &&
             arraysAreEqual(key, COMMIT_TRANSACTION_KEY)) {
@@ -215,6 +217,8 @@ class MockVM {
         }
         case koinos.chain.system_call_id.get_object: {
           const { space, key } = koinos.chain.get_object_arguments.decode(argsBuf)
+
+          console.log(`get object: ${space}, ${key}`)
 
           const dbObject = this.db.getObject(space, key)
 
