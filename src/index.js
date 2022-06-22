@@ -65,6 +65,8 @@ class MockVM {
   }
 
   invokeSystemCall (sid, ret_ptr, ret_len, arg_ptr, arg_len, ret_bytes) {
+    console.log(sid);
+
     const retBytesBuffer = new Uint32Array(this.memory.buffer, ret_bytes, 1 )
     const retBuf = new Uint8Array(this.memory.buffer, ret_ptr, ret_len)
     let retBytes = 0
