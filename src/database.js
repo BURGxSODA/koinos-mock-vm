@@ -1,5 +1,5 @@
 const { koinos } = require('koinos-proto-js')
-const { arraysAreEqual, toHexString, UInt8ArrayToString } = require('./util')
+const { arraysAreEqual, toHexString, UInt8ArrayToString, StringToUInt8Array } = require('./util')
 
 function canonicalizeSpace(space) {
   return {
@@ -44,7 +44,7 @@ class Database {
     const dbKey = koinos.chain.database_key.encode({ space: canonicalizeSpace(space), key }).finish()
     console.log("putObject: " + toHexString(dbKey) + ", " + toHexString(obj));
 
-    this.db.set(UInt8ArrayToString(dbKey), obj)
+    this.db.set(UInt8ArrayToString(dbKey), UInt8ArrayToString(obj))
     console.log(this.db)
   }
 
@@ -65,7 +65,7 @@ class Database {
 
     if (value !== undefined) {
       console.log("getObject: " + toHexString(value))
-      return koinos.chain.database_object.create({ exists: true, value })
+      return koinos.chain.database_object.create({ exists: true, value: StringToUInt8Array(value) })
     } else {
       console.log("getObject: " + value)
     }
@@ -97,13 +97,13 @@ class Database {
           if (decodedNextKey.space.system === space.system &&
             decodedNextKey.space.id === space.id &&
             arraysAreEqual(decodedNextKey.space.zone, space.zone)) {
-            return koinos.chain.database_object.create({ exists: true, value: nextVal, key: decodedNextKey.key })
+            return koinos.chain.database_object.create({ exists: true, value: StringToUInt8Array(nextVal), key: decodedNextKey.key })
           }
         } else if (currKey > dbKey) {
           // if the current key is greater than the one we're looking for
           // then, the current key is considered the next key
           const nextVal = this.db.get(currKey)
-          return koinos.chain.database_object.create({ exists: true, value: nextVal, key: decodedCurrKey.key })
+          return koinos.chain.database_object.create({ exists: true, value: StringToUInt8Array(nextVal), key: decodedCurrKey.key })
         }
       }
     }
@@ -135,13 +135,13 @@ class Database {
           if (decodedPrevKey.space.system === space.system &&
             decodedPrevKey.space.id === space.id &&
             arraysAreEqual(decodedPrevKey.space.zone, space.zone)) {
-            return koinos.chain.database_object.create({ exists: true, value: prevVal, key: decodedPrevKey.key })
+            return koinos.chain.database_object.create({ exists: true, value: StringToUInt8Array(prevVal), key: decodedPrevKey.key })
           }
         } else if (currKey < dbKey) {
           // if the current key is lower than the one we're looking for
           // then, the current key is considered the prev key
           const prevVal = this.db.get(currKey)
-          return koinos.chain.database_object.create({ exists: true, value: prevVal, key: decodedCurrKey.key })
+          return koinos.chain.database_object.create({ exists: true, value: StringToUInt8Array(prevVal), key: decodedCurrKey.key })
         }
       }
     }
