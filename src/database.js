@@ -41,6 +41,17 @@ class Database {
     this.commitTransaction()
   }
 
+  log () {
+    console.log("Database(" + this.db.size() + ") {");
+    const keys = [...this.db.keys()]
+
+    for (let i = keys.length - 1; i >= 0; i--) {
+      console.log("   " + toHexString(keys[i]) + " => " + toHexString(this.db.get(keys[i])) + ",");
+    }
+
+    console.log("}")
+  }
+
   putObject (space, key, obj) {
     const dbKey = koinos.chain.database_key.encode({ space: canonicalizeSpace(space), key }).finish()
     let bytesUsed = 0
@@ -69,6 +80,7 @@ class Database {
   }
 
   getObject (space, key) {
+    console.log(this.db)
     const dbKey = koinos.chain.database_key.encode({ space: canonicalizeSpace(space), key }).finish()
     const value = this.db.get(dbKey)
 
