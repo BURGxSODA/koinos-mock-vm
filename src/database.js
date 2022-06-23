@@ -1,6 +1,6 @@
 const { SoMap } = require('somap')
 const { koinos } = require('koinos-proto-js')
-const { arraysAreEqual } = require('./util')
+const { arraysAreEqual, toHexString } = require('./util')
 
 function canonicalizeSpace(space) {
   return {
@@ -48,6 +48,8 @@ class Database {
       bytesUsed -= currentObj.byteLength
     }
 
+    console.log("putObject: " + toHexString(dbKey) + ", " + toHexString(obj));
+
     this.db.set(dbKey, obj)
 
     bytesUsed += obj.byteLength
@@ -65,7 +67,10 @@ class Database {
     const dbKey = koinos.chain.database_key.encode({ space: canonicalizeSpace(space), key }).finish()
     const value = this.db.get(dbKey)
 
+    console.log("getObject: " + toHexString(dbKey))
+
     if (value) {
+      console.log("getObject: " + toHexString(value))
       return koinos.chain.database_object.create({ exists: true, value })
     }
 

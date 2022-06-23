@@ -227,7 +227,7 @@ class MockVM {
 
           if (dbObject) {
             const buffer = koinos.chain.get_object_result.encode({ value: dbObject }).finish()
-            console.log("get object value: " +  toHexString(buffer))
+            console.log("get object value: " +  toHexString(dbObject.value))
             buffer.copy(retBuf)
             retBytes = buffer.byteLength
           }
