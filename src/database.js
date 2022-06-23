@@ -64,6 +64,8 @@ class Database {
     if (value !== undefined) {
       console.log("getObject: " + toHexString(value))
       return koinos.chain.database_object.create({ exists: true, value })
+    } else {
+      console.log("getObject: " + undefined)
     }
 
     return null
