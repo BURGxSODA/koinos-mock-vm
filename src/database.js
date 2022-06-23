@@ -1,4 +1,3 @@
-const { SoMap } = require('somap')
 const { koinos } = require('koinos-proto-js')
 const { arraysAreEqual, toHexString } = require('./util')
 
@@ -16,7 +15,7 @@ class Database {
 
   initDb (arr = []) {
     console.log("init")
-    this.db = new SoMap(arr, this.comparator)
+    this.db = new Map(arr)
     this.commitTransaction()
   }
 
@@ -32,32 +31,20 @@ class Database {
 
   commitTransaction () {
     console.log("commit")
-    this.backupDb = new SoMap(this.db)
+    this.backupDb = new Map(this.db)
   }
 
   rollbackTransaction () {
     console.log("rollback")
-    this.initDb(this.backupDb)
+    this.db = new Map(this.backupDb)
     this.commitTransaction()
   }
 
   putObject (space, key, obj) {
     const dbKey = koinos.chain.database_key.encode({ space: canonicalizeSpace(space), key }).finish()
-    let bytesUsed = 0
-
-    const currentObj = this.db.has(dbKey)
-
-    if (currentObj) {
-      bytesUsed -= currentObj.byteLength
-    }
-
     console.log("putObject: " + toHexString(dbKey) + ", " + toHexString(obj));
 
     this.db.set(dbKey, obj)
-
-    bytesUsed += obj.byteLength
-
-    return bytesUsed
   }
 
   removeObject (space, key) {
@@ -85,17 +72,23 @@ class Database {
   getNextObject (space, key) {
     const dbKey = koinos.chain.database_key.encode({ space: canonicalizeSpace(space), key }).finish()
     console.log("getNextObject: " + toHexString(dbKey));
+
     if (!this.db.get(dbKey)) {
       return null
     }
 
-    const keys = [...this.db.keys()]
+    const keys = [...this.db.keys()].sort(this.comparator)
 
     for (let i = 0; i < keys.length; i++) {
       const currKey = keys[i]
+      const decodedCurrKey = koinos.chain.database_key.decode(currKey)
 
-      if (arraysAreEqual(currKey, dbKey)) {
-        if ((i + 1) < keys.length) {
+      // if the current key belongs to the space
+      if (decodedCurrKey.space.system === space.system &&
+        decodedCurrKey.space.id === space.id &&
+        arraysAreEqual(decodedCurrKey.space.zone, space.zone)) {
+        // if it's the key we are looking for, get the next objec if exists
+        if (arraysAreEqual(currKey, dbKey) && (i + 1) < keys.length) {
           const nextKey = keys[i + 1]
           const nextVal = this.db.get(nextKey)
 
@@ -106,6 +99,11 @@ class Database {
             arraysAreEqual(decodedNextKey.space.zone, space.zone)) {
             return koinos.chain.database_object.create({ exists: true, value: nextVal, key: decodedNextKey.key })
           }
+        } else if (currKey > dbKey) {
+          // if the current key is greater than the one we're looking for
+          // then, the current key is considered the next key
+          const nextVal = this.db.get(currKey)
+          return koinos.chain.database_object.create({ exists: true, value: nextVal, key: decodedCurrKey.key })
         }
       }
     }
@@ -121,13 +119,18 @@ class Database {
       return null
     }
 
-    const keys = [...this.db.keys()]
+    const keys = [...this.db.keys()].sort(this.comparator)
 
     for (let i = keys.length - 1; i >= 0; i--) {
       const currKey = keys[i]
+      const decodedCurrKey = koinos.chain.database_key.decode(currKey)
 
-      if (arraysAreEqual(currKey, dbKey)) {
-        if ((i - 1) >= 0) {
+      // if the current key belongs to the space
+      if (decodedCurrKey.space.system === space.system &&
+        decodedCurrKey.space.id === space.id &&
+        arraysAreEqual(decodedCurrKey.space.zone, space.zone)) {
+        // if it's the key we are looking for, get the next objec if exists
+        if (arraysAreEqual(currKey, dbKey) && (i - 1) >= 0) {
           const prevKey = keys[i - 1]
           const prevVal = this.db.get(prevKey)
 
@@ -138,6 +141,11 @@ class Database {
             arraysAreEqual(decodedPrevKey.space.zone, space.zone)) {
             return koinos.chain.database_object.create({ exists: true, value: prevVal, key: decodedPrevKey.key })
           }
+        } else if (currKey < dbKey) {
+          // if the current key is lower than the one we're looking for
+          // then, the current key is considered the prev key
+          const prevVal = this.db.get(currKey)
+          return koinos.chain.database_object.create({ exists: true, value: prevVal, key: decodedCurrKey.key })
         }
       }
     }
