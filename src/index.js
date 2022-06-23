@@ -15,7 +15,8 @@ const {
   hashSHA256,
   hashSHA512,
   hashKeccak256,
-  hashRIPEMD160
+  hashRIPEMD160,
+  toHexString
 } = require('./util')
 const {
   METADATA_SPACE,
@@ -197,7 +198,7 @@ class MockVM {
         case koinos.chain.system_call_id.put_object: {
           const { space, key, obj } = koinos.chain.put_object_arguments.decode(argsBuf)
 
-          console.log(`put object: ${space}, ${key}, ${obj}`)
+          console.log("put object: {id: " + util.toHexString(space.id) + `, system: ${space.system}, zone: ` + util.toHexString(space.zone) + "}, " + util.encodeBase58(key) + ", " + util.toHexString(obj))
 
           if (space.system === METADATA_SPACE.system &&
             ( space.id === METADATA_SPACE.id || space.id === null ) &&
@@ -220,12 +221,13 @@ class MockVM {
         case koinos.chain.system_call_id.get_object: {
           const { space, key } = koinos.chain.get_object_arguments.decode(argsBuf)
 
-          console.log(`get object: ${space}, ${key}`)
+          console.log("get object: {id: " + util.toHexString(space.id) + `, system: ${space.system}, zone: ` + util.toHexString(space.zone) + "}, " + util.encodeBase58(key))
 
           const dbObject = this.db.getObject(space, key)
 
           if (dbObject) {
             const buffer = koinos.chain.get_object_result.encode({ value: dbObject }).finish()
+            console.log("get object value: " + util.toHexString(buffer))
             buffer.copy(retBuf)
             retBytes = buffer.byteLength
           }
