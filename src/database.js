@@ -1,5 +1,5 @@
 const { koinos } = require('koinos-proto-js')
-const { arraysAreEqual, toHexString } = require('./util')
+const { arraysAreEqual, toHexString, UInt8ArrayToString } = require('./util')
 
 function canonicalizeSpace(space) {
   return {
@@ -44,7 +44,7 @@ class Database {
     const dbKey = koinos.chain.database_key.encode({ space: canonicalizeSpace(space), key }).finish()
     console.log("putObject: " + toHexString(dbKey) + ", " + toHexString(obj));
 
-    this.db.set(dbKey, obj)
+    this.db.set(UInt8ArrayToString(dbKey), obj)
     console.log(this.db)
   }
 
@@ -53,12 +53,12 @@ class Database {
 
     console.log("removeObject: " + toHexString(dbKey));
 
-    this.db.delete(dbKey)
+    this.db.delete(UInt8ArrayToString(dbKey))
   }
 
   getObject (space, key) {
     const dbKey = koinos.chain.database_key.encode({ space: canonicalizeSpace(space), key }).finish()
-    const value = this.db.get(dbKey)
+    const value = this.db.get(UInt8ArrayToString(dbKey))
 
     console.log(this.db)
     console.log("getObject: " + toHexString(dbKey))
@@ -76,10 +76,6 @@ class Database {
   getNextObject (space, key) {
     const dbKey = koinos.chain.database_key.encode({ space: canonicalizeSpace(space), key }).finish()
     console.log("getNextObject: " + toHexString(dbKey));
-
-    if (!this.db.get(dbKey)) {
-      return null
-    }
 
     const keys = [...this.db.keys()].sort(this.comparator)
 
@@ -118,10 +114,6 @@ class Database {
   getPrevObject (space, key) {
     const dbKey = koinos.chain.database_key.encode({ space: canonicalizeSpace(space), key }).finish()
     console.log("getPrevObject: " + toHexString(dbKey));
-
-    if (!this.db.get(dbKey)) {
-      return null
-    }
 
     const keys = [...this.db.keys()].sort(this.comparator)
 
