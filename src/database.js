@@ -63,6 +63,8 @@ class Database {
   removeObject (space, key) {
     const dbKey = koinos.chain.database_key.encode({ space: canonicalizeSpace(space), key }).finish()
 
+    console.log("removeObject: " + toHexString(dbKey));
+
     this.db.delete(dbKey)
   }
 
@@ -82,6 +84,7 @@ class Database {
 
   getNextObject (space, key) {
     const dbKey = koinos.chain.database_key.encode({ space: canonicalizeSpace(space), key }).finish()
+    console.log("getNextObject: " + toHexString(dbKey));
     if (!this.db.get(dbKey)) {
       return null
     }
@@ -112,6 +115,8 @@ class Database {
 
   getPrevObject (space, key) {
     const dbKey = koinos.chain.database_key.encode({ space: canonicalizeSpace(space), key }).finish()
+    console.log("getPrevObject: " + toHexString(dbKey));
+
     if (!this.db.get(dbKey)) {
       return null
     }
