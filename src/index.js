@@ -198,7 +198,7 @@ class MockVM {
         case koinos.chain.system_call_id.put_object: {
           const { space, key, obj } = koinos.chain.put_object_arguments.decode(argsBuf)
 
-          console.log("put object: {id: " + util.toHexString(space.id) + `, system: ${space.system}, zone: ` + util.toHexString(space.zone) + "}, " + util.encodeBase58(key) + ", " + util.toHexString(obj))
+          console.log("put object: {id: " +  toHexString(space.id) + `, system: ${space.system}, zone: ` +  toHexString(space.zone) + "}, " +  encodeBase58(key) + ", " +  toHexString(obj))
 
           if (space.system === METADATA_SPACE.system &&
             ( space.id === METADATA_SPACE.id || space.id === null ) &&
@@ -221,13 +221,13 @@ class MockVM {
         case koinos.chain.system_call_id.get_object: {
           const { space, key } = koinos.chain.get_object_arguments.decode(argsBuf)
 
-          console.log("get object: {id: " + util.toHexString(space.id) + `, system: ${space.system}, zone: ` + util.toHexString(space.zone) + "}, " + util.encodeBase58(key))
+          console.log("get object: {id: " +  toHexString(space.id) + `, system: ${space.system}, zone: ` +  toHexString(space.zone) + "}, " +  encodeBase58(key))
 
           const dbObject = this.db.getObject(space, key)
 
           if (dbObject) {
             const buffer = koinos.chain.get_object_result.encode({ value: dbObject }).finish()
-            console.log("get object value: " + util.toHexString(buffer))
+            console.log("get object value: " +  toHexString(buffer))
             buffer.copy(retBuf)
             retBytes = buffer.byteLength
           }
