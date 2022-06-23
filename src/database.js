@@ -45,6 +45,7 @@ class Database {
     console.log("putObject: " + toHexString(dbKey) + ", " + toHexString(obj));
 
     this.db.set(dbKey, obj)
+    console.log(this.db)
   }
 
   removeObject (space, key) {
@@ -59,6 +60,7 @@ class Database {
     const dbKey = koinos.chain.database_key.encode({ space: canonicalizeSpace(space), key }).finish()
     const value = this.db.get(dbKey)
 
+    console.log(this.db)
     console.log("getObject: " + toHexString(dbKey))
 
     if (value !== undefined) {
