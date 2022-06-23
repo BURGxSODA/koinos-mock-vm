@@ -15,6 +15,7 @@ class Database {
   }
 
   initDb (arr = []) {
+    console.log("init")
     this.db = new SoMap(arr, this.comparator)
     this.commitTransaction()
   }
@@ -30,10 +31,12 @@ class Database {
   }
 
   commitTransaction () {
+    console.log("commit")
     this.backupDb = new SoMap(this.db)
   }
 
   rollbackTransaction () {
+    console.log("rollback")
     this.initDb(this.backupDb)
     this.commitTransaction()
   }
