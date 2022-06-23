@@ -58,16 +58,15 @@ class Database {
 
   getObject (space, key) {
     const dbKey = koinos.chain.database_key.encode({ space: canonicalizeSpace(space), key }).finish()
-    const value = this.db.get(UInt8ArrayToString(dbKey))
+    const strValue = this.db.get(UInt8ArrayToString(dbKey))
 
     console.log(this.db)
     console.log("getObject: " + toHexString(dbKey))
 
-    if (value !== undefined) {
-      console.log("getObject: " + toHexString(StringToUInt8Array(value)))
-      return koinos.chain.database_object.create({ exists: true, value: StringToUInt8Array(value) })
-    } else {
-      console.log("getObject: " + value)
+    if (strValue !== undefined) {
+      const value = StringToUInt8Array(value)
+      console.log("found! " + toHexString(value))
+      return koinos.chain.database_object.create({ exists: true, value })
     }
 
     return null
