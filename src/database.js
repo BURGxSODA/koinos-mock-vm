@@ -80,7 +80,7 @@ class Database {
   }
 
   getObject (space, key) {
-    console.log(this.db)
+    this.log()
     const dbKey = koinos.chain.database_key.encode({ space: canonicalizeSpace(space), key }).finish()
     const value = this.db.get(dbKey)
 
