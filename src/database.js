@@ -42,7 +42,7 @@ class Database {
   }
 
   log () {
-    console.log("Database(" + this.db.size() + ") {");
+    console.log("Database(" + this.db.size + ") {");
     const keys = [...this.db.keys()]
 
     for (let i = keys.length - 1; i >= 0; i--) {
